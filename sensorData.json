@@ -1,0 +1,9 @@
+{
+  "temperature": 24.7,
+  "humidity": 41.9,
+  "ldr": 2568,
+  "gas": 520,
+  "aqi": 29,
+  "gas1": 540,
+  "gas2": 500
+}

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Document</title>
+</head>
+<body>
+
+    <!--hexagon bg-->
+    <div class="hex-bg"></div>
+
+    <!-- login page -->
+    <div class="loginPage" id="loginPage">  
+        <div class="login-card">
+            <h2>LOGIN</h2>
+            <input type="text" id="username" placeholder="demo@hexashield.com">
+            <input type="password" id="password" placeholder="demo$1233">
+            <button id="loginBtn">Sign In</button>
+            <p>Forgot password?</p>
+        </div>
+    </div>
+
+    <!-- loading screen -->
+    <div class="loadingPage" id="loadingPage">
+        <div class="loader"></div>
+        <div class="loading-text">Initializing Sensors...</div>
+    </div>
+
+    <!-- sensor dashboard -->
+    <div class="dashboardPage" id="dashboardPage">
+
+        <div class="sensor-grid">
+            <!-- ldr -->
+            <div class="sensor-card ldr-card">
+                <div class="content">
+                    <div class="sensor-title">LIGHT DEPENDENT RESISTOR</div>
+                    <div class="sensor-value" id="ldrValue">3000</div>
+                    <div class="sensor-unit">LUX</div>                     
+                </div>
+            </div>
+
+            <!-- gas -->
+            <div class="sensor-card gas-card">
+                <div class="content">
+                    <div class="sensor-title">AIR QUALITY INDEX</div>
+                    <div class="semi-gauge">
+                        <svg viewBox="0 0 200 120">
+                            <path d="M20 100 A80 80 0 0 1 180 100" class="gauge-bg"/>
+                            <path d="M20 100 A80 80 0 0 1 180 100" class="gauge-fill"/>
+                            <line x1="100" y1="100" x2="100" y2="35" class="needle"/>
+                            <circle cx="100" cy="100" r="5" class="needle-base"/>
+                        </svg>
+                        <div class="aqi-value">
+                            <div class="gauge-reading">145</div>
+                            <div class="sensor-unit">PPM</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <!-- MQ-135 CARDS -1 -->
+        <div class="sensor-card mq-135-1">
+                <div class="content">
+                    <div class="sensor-title">MQ-135 (1)</div>
+                    <div class="sensor-value" id="mq-135-card-1">68.2%</div>
+                    <div class="sensor-unit"></div>
+                </div>
+        </div>
+   
+        
+            <!-- temperature -->
+            <div class="sensor-card temp-card">
+                <div class="content">
+                    <div class="sensor-title">TEMPERATURE</div>
+                    <div class="sensor-value" id="tempValue">28.5°C</div>
+                    <div class="sensor-unit">DHT SENSOR</div>
+                </div>
+            </div>
+                        <!-- humidity -->
+            <div class="sensor-card humidity-card">
+                <div class="content">
+                    <div class="sensor-title">HUMIDITY READING</div>
+                    <div class="sensor-value" id="humidityValue">68.2%</div>
+                    <div class="sensor-unit">DHT SENSOR</div>
+                </div>
+            </div>  
+        <!-- MQ-135 CARDS -2 -->
+        <div class="sensor-card mq-135-2">
+                <div class="content">
+                    <div class="sensor-title">MQ-135 (2)</div>
+                    <div class="sensor-value" id="mq-135-card-2">68.2%</div>
+                    <div class="sensor-unit"></div>
+                </div>
+        </div>
+
+        </div>
+        
+            
+
+        <!-- CHART SECTION -->
+        <section class="chart-section">
+            <div class="chart-card">
+                <canvas id="ldrChart"></canvas>
+                <div class="chart-info">
+                    <h3>LDR – Light Intensity</h3>
+                    <p>Variation of light levels across time. Red zone indicates excessive light.</p>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <canvas id="tempChart"></canvas>
+                <div class="chart-info">
+                    <h3>Temperature</h3>
+                    <p>Area chart showing thermal trends.</p>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <canvas id="humidityChart"></canvas>
+                <div class="chart-info">
+                    <h3>Humidity</h3>
+                    <p>Relative humidity changes over time.</p>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <canvas id="aqiChart"></canvas>
+                <div class="chart-info">
+                    <h3>Air Quality Index</h3>
+                    <p>Air quality inside construction site vs purified air outside.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- LDR ALERT POPUP -->
+        <div id="ldrAlert" class="alert-popup alert-hidden">
+            <div class="alert-content">
+                <div class="alert-icon">🚨</div>
+                <div class="alert-text">
+                    <h3>HIGH LIGHT INTENSITY</h3>
+                    <p>LDR reading exceeds safe threshold: <strong id="alertLdrValue">2850 LUX</strong></p>
+                </div>
+                <button class="alert-close" onclick="closeAlert()">&times;</button>
+            </div>
+        </div>
+
+        <!-- ✅ ESP32 CONNECTION BUTTON -->
+        <div style="text-align:center; margin:40px 0;">
+            <button onclick="connectESP32()"
+                style="
+                    padding:14px 28px;
+                    font-size:16px;
+                    font-weight:bold;
+                    background:#facc15;
+                    border:none;
+                    border-radius:8px;
+                    cursor:pointer;
+                ">
+                ENABLE ESP32 CONNECTION
+            </button>
+        </div>
+
+    </div>
+
+<script>
+    // HEXAGON BACKGROUND
+    document.addEventListener('mousemove', (e) => {
+        const hexBg = document.querySelector('.hex-bg');
+        const x = (e.clientX / window.innerWidth) * 100;
+        const y = (e.clientY / window.innerHeight) * 100;
+        hexBg.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px) scale(1.03)`;
+        hexBg.style.filter = `brightness(1.4) hue-rotate(${x * 0.3}deg)`;
+    });
+
+    // LOGIN FUNCTION FIXED
+    function login() {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('loadingPage').style.display = 'flex';
+
+        setTimeout(() => {
+            document.getElementById('loadingPage').style.display = 'none';
+            document.getElementById('dashboardPage').style.display = 'block';
+            if (typeof initCharts === "function") initCharts();
+            if (typeof startLdrMonitoring === "function") startLdrMonitoring();
+        }, 2000);
+    }
+
+    // LOGIN BUTTON AND ENTER KEY
+    document.getElementById('loginBtn').addEventListener('click', login);
+    document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') {
+            login();
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="./index.js"></script>
+
+<script>
+    // LDR ALERT SYSTEM
+    let ldrAlertActive = false;
+
+    function startLdrMonitoring() {
+        setInterval(() => {
+            const ldrValue = parseInt(document.getElementById('ldrValue').textContent);
+            if (ldrValue <= 2000 && !ldrAlertActive) {
+                showLdrAlert(ldrValue);
+            }
+        }, 1000);
+    }
+
+    function showLdrAlert(value) {
+        ldrAlertActive = true;
+        document.getElementById('alertLdrValue').textContent = value + ' LUX';
+        const alertEl = document.getElementById('ldrAlert');
+        alertEl.classList.remove('alert-hidden');
+        alertEl.style.right = '30px';
+        setTimeout(() => { closeAlert(); }, 10000);
+    }
+
+    function closeAlert() {
+        document.getElementById('ldrAlert').classList.add('alert-hidden');
+        setTimeout(() => { ldrAlertActive = false; }, 500);
+    }
+
+    // SIMULATE HIGH LDR (Remove later)
+    setTimeout(() => {
+        if (document.getElementById('dashboardPage').style.display === 'block') {
+            document.getElementById('ldrValue').textContent = '2850';
+        }
+    }, 8000);
+</script>
+</body>
+</html>
